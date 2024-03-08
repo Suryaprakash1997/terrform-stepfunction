@@ -1,6 +1,6 @@
 #! /bin/bash
 terraform init
-terraform destroy -auto-approve
+terraform apply -auto-approve
 if [ $? -eq 0 ]; then
     echo "success" > script-status.txt
 else
