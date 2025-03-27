@@ -5,11 +5,11 @@ remote_state {
     if_exists = "overwrite_terragrunt"
   }
   config = {
-    bucket         = "brc-infra-01-atlantis-terraform-state"
+    bucket         = "rgb-stage-01-atlantis-terraform-state"
     key            = "${path_relative_to_include()}/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
-    dynamodb_table = "brc-infra-01-atlantis-terraform-locks"
+    dynamodb_table = "rgb-stage-01-atlantis-terraform-locks"
     s3_bucket_tags = {
       ManagedBy     = "Terraform"
       ProvisionedBy = "Surya"
