@@ -54,7 +54,7 @@ inputs = {
   handler              = "lambdas.inr-hedging.place_hedging_orders.place_hedging_orders_handler"
   memory_size          = 1024
 
-  required_outbound_cidrs = required_outbound_cidrs = [
+  required_outbound_cidrs = [
     "10.0.12.0/24",
     "10.0.13.0/24",
     "10.0.14.0/24"
