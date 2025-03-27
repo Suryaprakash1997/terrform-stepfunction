@@ -18,6 +18,7 @@ inputs = {
   env                                   =   include.env.locals.env
   region                                =   include.env.locals.region
   index                                 =   include.env.locals.index
+  service                               =   mm_primary_vpc
   number_of_azs                         =   3
   number_of_private_subnets             =   27
   number_of_public_subnets              =   3
