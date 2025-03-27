@@ -29,11 +29,6 @@ generate "provider" {
   contents  = <<EOF
 provider "aws" {
   region = "us-east-1"
-  
-  # Assume the cross-account role
-  assume_role {
-    role_arn     = "arn:aws:iam::024965292589:role/brc-dev-01-terraform-execution-infra-cross-account-role"
-  }
 }
 
 terraform {
