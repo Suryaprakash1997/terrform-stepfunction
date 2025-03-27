@@ -1,0 +1,127 @@
+version: 3
+automerge: false
+
+projects:
+  # dev-01/us-east-1 environment - individual modules
+  - name: dev-01/us-east-1/base
+    dir: environment/dev-01/us-east-1/base
+    workflow: terragrunt
+    branch: /dev/
+    autoplan:
+      when_modified: 
+        - "environment/dev-01/us-east-1/base/**"
+        - "layers/base/**"
+        - "environment/dev-01/us-east-1/env.hcl"
+        - "environment/dev-01/us-east-1/terragrunt.hcl" 
+  
+  - name: dev-01/us-east-1/lambda/place_hedging_orders
+    dir: environment/dev-01/us-east-1/lambda/place_hedging_orders
+    workflow: terragrunt-run-all
+    branch: /dev/
+    autoplan:
+      when_modified: 
+        - "environment/dev-01/us-east-1/lambda/place_hedging_orders/**"
+        - "layers/lambda/place_hedging_orders/**"
+        - "environment/dev-01/us-east-1/env.hcl"
+        - "environment/dev-01/us-east-1/terragrunt.hcl"
+
+  - name: dev-01/us-east-1/lambda/cancel_order_executor_hedging_orders
+    dir: environment/dev-01/us-east-1/lambda/cancel_order_executor_hedging_orders
+    workflow: terragrunt-run-all
+    branch: /dev/
+    autoplan:
+      when_modified: 
+        - "environment/dev-01/us-east-1/lambda/cancel_order_executor_hedging_orders/**"
+        - "layers/lambda/cancel_order_executor_hedging_orders/**"
+        - "environment/dev-01/us-east-1/env.hcl"
+        - "environment/dev-01/us-east-1/terragrunt.hcl"
+
+  # Prod environment - individual modules
+  - name: prod-base
+    dir: environment/prod-01/us-east-1/base
+    workflow: terragrunt
+    branch: /main/
+    autoplan:
+      when_modified: 
+        - "environment/prod/base/**"
+        - "layers/base/**"
+        - "environment/prod/env.hcl"
+        - "environment/prod/terragrunt.hcl"
+
+  # dev-01/us-east-1 environment - run all modules together
+  - name: dev-all
+    dir: environment/dev-01/us-east-1
+    workflow: terragrunt-run-all
+    branch: /dev/
+    autoplan:
+      when_modified: 
+        - "environment/dev-01/us-east-1/terragrunt.hcl"
+        - "environment/dev-01/us-east-1/env.hcl"
+
+  # Prod environment - run all modules together
+  - name: prod-all
+    dir: environment/prod-01/us-east-1/
+    workflow: terragrunt-run-all
+    branch: /main/
+    autoplan:
+      when_modified: 
+        - "environment/prod/terragrunt.hcl"
+        - "environment/prod/env.hcl"
+
+workflows:
+  terragrunt:
+    plan:
+      steps:
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        - env:
+            name: TF_IN_AUTOMATION
+            value: 'true'
+        - run:
+            command: terragrunt init -no-color
+            output: hide
+        - run:
+            command: terragrunt plan -no-color -out=$PLANFILE
+            output: strip_refreshing
+    apply:
+      steps:
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        - env:
+            name: TF_IN_AUTOMATION
+            value: 'true'
+        - run: terragrunt apply -no-color $PLANFILE
+
+  # FIXED run-all workflows that don't use planfile for run-all
+  terragrunt-run-all:
+    plan:
+      steps:
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        - env:
+            name: TF_IN_AUTOMATION
+            value: 'true'
+        - env:
+            name: TERRAGRUNT_NON_INTERACTIVE
+            value: 'true'
+        - run:
+            command: terragrunt run-all init -no-color --terragrunt-non-interactive
+            output: hide
+        - run:
+            command: terragrunt run-all plan -no-color --terragrunt-non-interactive
+            output: strip_refreshing
+    apply:
+      steps:
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: 'echo "terraform${ATLANTIS_TERRAFORM_VERSION}"'
+        - env:
+            name: TF_IN_AUTOMATION
+            value: 'true'
+        - env:
+            name: TERRAGRUNT_NON_INTERACTIVE
+            value: 'true'
+        - run: terragrunt run-all apply -no-color --terragrunt-non-interactive -auto-approve

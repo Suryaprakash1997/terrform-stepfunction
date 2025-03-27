@@ -1,0 +1,48 @@
+remote_state {
+  backend = "s3"
+  generate = {
+    path      = "backend.tf"
+    if_exists = "overwrite_terragrunt"
+  }
+  config = {
+    bucket         = "brc-infra-01-atlantis-terraform-state"
+    key            = "${path_relative_to_include()}/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "brc-infra-01-atlantis-terraform-locks"
+    s3_bucket_tags = {
+      ManagedBy     = "Terraform"
+      ProvisionedBy = "Surya"
+      Purpose       = "store terraform state files"
+    }
+    dynamodb_table_tags = {
+      ManagedBy     = "Terraform"
+      ProvisionedBy = "Surya"
+      Purpose       = "store terraform lock file"
+    }
+  }
+}
+
+generate "provider" {
+  path      = "provider.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOF
+provider "aws" {
+  region = "us-east-1"
+  
+  assume_role {
+    role_arn     = "arn:aws:iam::024965292589:role/brc-dev-01-atlantis-assume-role" 
+  }
+}
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 2.31.0"
+    }
+  }
+}
+
+EOF
+}
