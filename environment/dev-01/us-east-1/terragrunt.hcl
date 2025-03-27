@@ -29,10 +29,6 @@ generate "provider" {
   contents  = <<EOF
 provider "aws" {
   region = "us-east-1"
-  
-  assume_role {
-    role_arn     = "arn:aws:iam::024965292589:role/brc-dev-01-atlantis-assume-role" 
-  }
 }
 
 terraform {
